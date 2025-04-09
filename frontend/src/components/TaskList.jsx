@@ -59,16 +59,16 @@ const TaskList = () => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
-    const oldIndex = filteredTasks.findIndex((task) => task.id === active.id);
-    const newIndex = filteredTasks.findIndex((task) => task.id === over.id);
+    const oldIndex = tasks.findIndex((task) => task.id === active.id);
+    const newIndex = tasks.findIndex((task) => task.id === over.id);
 
-    const reordered = arrayMove(filteredTasks, oldIndex, newIndex);
+    const reordered = arrayMove(tasks, oldIndex, newIndex);
     reorderTasks(reordered);
   };
 
   return (
     <div className="task-list">
-      <div className="filters mb-4">
+      <div className="filters mb-4 space-x-2">
         <button onClick={() => setFilter("all")}>All</button>
         <button onClick={() => setFilter("completed")}>Completed</button>
         <button onClick={() => setFilter("pending")}>Pending</button>

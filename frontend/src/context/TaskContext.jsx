@@ -31,8 +31,17 @@ export const TaskProvider = ({ children }) => {
     [setTasks]
   );
 
+  const reorderTasks = useCallback(
+    (newOrder) => {
+      setTasks(newOrder);
+    },
+    [setTasks]
+  );
+
   return (
-    <TaskContext.Provider value={{ tasks, addTask, deleteTask, toggleTask }}>
+    <TaskContext.Provider
+      value={{ tasks, addTask, deleteTask, toggleTask, reorderTasks }}
+    >
       {children}
     </TaskContext.Provider>
   );
