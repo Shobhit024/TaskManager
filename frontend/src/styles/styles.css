@@ -144,7 +144,7 @@ button:hover,
 
 .task-item.completed .task-left span {
   text-decoration: line-through;
-  color: gray;
+  color: #2e7d32;
 }
 
 h1 {
