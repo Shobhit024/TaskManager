@@ -15,7 +15,11 @@ const TaskItem = React.memo(({ task }) => {
 
   return (
     <div className={`task-item ${task.completed ? "completed" : "pending"}`}>
-      <div className="task-left" onClick={handleToggle}>
+      <div
+        className="task-left"
+        onClick={handleToggle}
+        style={{ cursor: "pointer" }}
+      >
         {task.completed ? (
           <FaCheckCircle color="green" style={{ marginRight: "8px" }} />
         ) : (
