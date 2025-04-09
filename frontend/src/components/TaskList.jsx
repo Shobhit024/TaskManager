@@ -1,7 +1,39 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo } from "react";
 import { useTasks } from "../context/TaskContext.jsx";
 import TaskItem from "./TaskItem.jsx";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import {
+  DndContext,
+  closestCenter,
+  useSensor,
+  useSensors,
+  PointerSensor,
+  KeyboardSensor,
+  sortableKeyboardCoordinates,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+const SortableTask = ({ task }) => {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id: task.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    marginBottom: "8px",
+  };
+
+  return (
+    <li ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      <TaskItem task={task} />
+    </li>
+  );
+};
 
 const TaskList = () => {
   const { tasks, reorderTasks } = useTasks();
@@ -13,18 +45,23 @@ const TaskList = () => {
     return tasks;
   }, [tasks, filter]);
 
-  const handleDragEnd = useCallback(
-    (result) => {
-      if (!result.destination) return;
-
-      const newTasks = Array.from(filteredTasks);
-      const [moved] = newTasks.splice(result.source.index, 1);
-      newTasks.splice(result.destination.index, 0, moved);
-
-      reorderTasks(newTasks);
-    },
-    [filteredTasks, reorderTasks]
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
   );
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = filteredTasks.findIndex((task) => task.id === active.id);
+    const newIndex = filteredTasks.findIndex((task) => task.id === over.id);
+
+    const reordered = arrayMove(filteredTasks, oldIndex, newIndex);
+    reorderTasks(reordered);
+  };
 
   return (
     <div className="task-list">
@@ -34,41 +71,22 @@ const TaskList = () => {
         <button onClick={() => setFilter("pending")}>Pending</button>
       </div>
 
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <Droppable
-          droppableId="tasks"
-          isDropDisabled={false}
-          isCombineEnabled={false}
-          ignoreContainerClipping={false}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={filteredTasks.map((task) => task.id)}
+          strategy={verticalListSortingStrategy}
         >
-          {(provided) => (
-            <ul
-              className="task-items"
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-            >
-              {filteredTasks.map((task, index) => (
-                <Draggable
-                  key={String(task.id)}
-                  draggableId={String(task.id)}
-                  index={index}
-                >
-                  {(provided) => (
-                    <li
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                    >
-                      <TaskItem task={task} />
-                    </li>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </ul>
-          )}
-        </Droppable>
-      </DragDropContext>
+          <ul className="task-items">
+            {filteredTasks.map((task) => (
+              <SortableTask key={task.id} task={task} />
+            ))}
+          </ul>
+        </SortableContext>
+      </DndContext>
     </div>
   );
 };
