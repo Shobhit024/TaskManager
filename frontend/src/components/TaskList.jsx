@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { useTasks } from "../context/TaskContext.jsx";
 import TaskItem from "./TaskItem.jsx";
+
 import {
   DndContext,
   closestCenter,
@@ -8,14 +9,16 @@ import {
   useSensors,
   PointerSensor,
   KeyboardSensor,
-  sortableKeyboardCoordinates,
 } from "@dnd-kit/core";
+
 import {
   arrayMove,
   SortableContext,
   verticalListSortingStrategy,
   useSortable,
+  sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
+
 import { CSS } from "@dnd-kit/utilities";
 
 const SortableTask = ({ task }) => {
@@ -65,7 +68,7 @@ const TaskList = () => {
 
   return (
     <div className="task-list">
-      <div className="filters">
+      <div className="filters mb-4">
         <button onClick={() => setFilter("all")}>All</button>
         <button onClick={() => setFilter("completed")}>Completed</button>
         <button onClick={() => setFilter("pending")}>Pending</button>
